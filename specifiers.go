@@ -1,10 +1,5 @@
 package strftime
 
-import (
-	"strconv"
-	"time"
-)
-
 // https://strftime.org/
 func goLayout(s byte) string {
 	switch s {
@@ -200,30 +195,4 @@ func uts35PatternUnpadded(s byte) string {
 	case 'S':
 		return "s"
 	}
-}
-
-func weekNumber(t time.Time, pad, monday bool) string {
-	day := t.YearDay()
-	offset := int(t.Weekday())
-	if monday {
-		if offset == 0 {
-			offset = 6
-		} else {
-			offset--
-		}
-	}
-
-	if day < offset {
-		if pad {
-			return "00"
-		} else {
-			return "0"
-		}
-	}
-
-	n := (day-offset)/7 + 1
-	if n < 10 && pad {
-		return "0" + strconv.Itoa(n)
-	}
-	return strconv.Itoa(n)
 }

@@ -63,9 +63,9 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 			}
 			dst = strconv.AppendInt(dst, int64(w), 10)
 		case 'W':
-			dst = append(dst, weekNumber(t, pad, true)...)
+			dst = appendWeekNumber(dst, t, pad, true)
 		case 'U':
-			dst = append(dst, weekNumber(t, pad, false)...)
+			dst = appendWeekNumber(dst, t, pad, false)
 		case 'w':
 			dst = strconv.AppendInt(dst, int64(t.Weekday()), 10)
 		case 'u':
@@ -123,7 +123,7 @@ func Layout(fmt string) (string, error) {
 
 	parser.writeLit = func(b byte) error {
 		if '0' <= b && b <= '9' {
-			return errors.New("strftime: unsupported literal digit: '" + string(b) + "'")
+			return errors.New("strftime: unsupported literal: '" + string(b) + "'")
 		}
 		dst = append(dst, b)
 		if b == 'M' || b == 'T' || b == 'm' || b == 'n' {
@@ -150,6 +150,9 @@ func Layout(fmt string) (string, error) {
 
 	parser.fallback = func(spec byte, pad bool) error {
 		switch spec {
+		default:
+			return errors.New("strftime: unsupported specifier: %" + string(spec))
+
 		case 'L', 'f', 'N':
 			if bytes.HasSuffix(dst, []byte(".")) || bytes.HasSuffix(dst, []byte(",")) {
 				switch spec {
@@ -164,8 +167,6 @@ func Layout(fmt string) (string, error) {
 			}
 			return errors.New("strftime: unsupported specifier: %" + string(spec) + " must follow '.' or ','")
 		}
-
-		return errors.New("strftime: unsupported specifier: %" + string(spec))
 	}
 
 	if err := parser.parse(); err != nil {
@@ -232,4 +233,25 @@ func buffer(format string) (buf []byte) {
 		buf = make([]byte, 0, max)
 	}
 	return
+}
+
+func appendWeekNumber(dst []byte, t time.Time, pad, monday bool) []byte {
+	day := t.YearDay()
+	offset := int(t.Weekday())
+	if monday {
+		if offset == 0 {
+			offset = 6
+		} else {
+			offset--
+		}
+	}
+
+	var n int
+	if day >= offset {
+		n = (day-offset)/7 + 1
+	}
+	if n < 10 && pad {
+		dst = append(dst, '0')
+	}
+	return strconv.AppendInt(dst, int64(n), 10)
 }
