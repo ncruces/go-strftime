@@ -15,3 +15,11 @@ func BenchmarkFormat(b *testing.B) {
 		strftime.Format(benchfmt, t)
 	}
 }
+
+func BenchmarkAppendFormat(b *testing.B) {
+	var d []byte
+	var t time.Time
+	for i := 0; i < b.N; i++ {
+		d = strftime.AppendFormat(d[:0], benchfmt, t)
+	}
+}

@@ -2,8 +2,8 @@ package strftime
 
 type parser struct {
 	fmt      string
-	specs    map[byte]string
-	unpadded map[byte]string
+	basic    func(byte) string
+	unpadded func(byte) string
 	writeLit func(byte) error
 	writeFmt func(string) error
 	fallback func(spec byte, pad bool) error
@@ -32,7 +32,7 @@ func (p *parser) parse() error {
 				state = nopadding
 				continue
 			}
-			if fmt, ok := p.specs[b]; ok {
+			if fmt := p.basic(b); fmt != "" {
 				err = p.writeFmt(fmt)
 			} else {
 				err = p.fallback(b, true)
@@ -40,9 +40,9 @@ func (p *parser) parse() error {
 			state = initial
 
 		case nopadding:
-			if fmt, ok := p.unpadded[b]; ok {
+			if fmt := p.unpadded(b); fmt != "" {
 				err = p.writeFmt(fmt)
-			} else if fmt, ok := p.specs[b]; ok {
+			} else if fmt := p.basic(b); fmt != "" {
 				err = p.writeFmt(fmt)
 			} else {
 				err = p.fallback(b, false)
