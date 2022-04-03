@@ -2,17 +2,18 @@ package strftime_test
 
 import (
 	"fmt"
-	"log"
+	"os"
 
-	"github.com/ncruces/go-strftime"
+	strftime "github.com/ncruces/go-strftime"
 )
 
 func ExampleLayout() {
 	layout, err := strftime.Layout("%Y-%m-%d %H:%M:%S")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprint(os.Stderr, err)
+	} else {
+		fmt.Printf("%q", layout)
 	}
-	fmt.Printf("%q", layout)
 	// Output:
 	// "2006-01-02 15:04:05"
 }
