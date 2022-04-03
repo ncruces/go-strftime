@@ -52,7 +52,7 @@ func TestFormat_ruby(t *testing.T) {
 		// {"%FT%T%:z", "2007-11-19T08:37:48-06:00"},        // Date and time of day for calendar date (extended)
 		// {"%Y-%jT%T%:z", "2007-323T08:37:48-06:00"},       // Date and time of day for ordinal date (extended)
 		// {"%G-W%V-%uT%T%:z", "2007-W47-1T08:37:48-06:00"}, // Date and time of day for week date (extended)
-		// {"%G-W%V-%uT%R%:z", "2007-W47-1T08:37-06:00"},    // Week date and local time and difference from
+		// {"%G-W%V-%uT%R%:z", "2007-W47-1T08:37-06:00"},    // Week date and local time and difference from UTC (extended)
 	}
 
 	for _, test := range tests {

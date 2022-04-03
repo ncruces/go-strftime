@@ -86,6 +86,18 @@ func TestFormat(t *testing.T) {
 	}
 }
 
+func TestFormat_Unix(t *testing.T) {
+	tm := time.Unix(123456, 789*int64(time.Millisecond))
+
+	if got := strftime.Format("%s", tm); got != "123456" {
+		t.Errorf("Format(%q) = %q, want %q", "%s", got, "123456")
+	}
+
+	if got := strftime.Format("%Q", tm); got != "123456789" {
+		t.Errorf("Format(%q) = %q, want %q", "%s", got, "123456789")
+	}
+}
+
 func TestLayout(t *testing.T) {
 	for _, test := range timeTests {
 		if got, err := strftime.Layout(test.format); err != nil && test.layout != "" {
@@ -106,7 +118,7 @@ func TestUTS35(t *testing.T) {
 	}
 }
 
-func Example_convertToGoTimeLayout() {
+func ExampleLayout() {
 	layout, err := strftime.Layout("%Y-%m-%d %H:%M:%S")
 	if err != nil {
 		log.Fatal(err)
@@ -116,7 +128,7 @@ func Example_convertToGoTimeLayout() {
 	// "2006-01-02 15:04:05"
 }
 
-func Example_convertToNSDateFormatterPattern() {
+func ExampleUTS35() {
 	layout, err := strftime.UTS35("%Y-%m-%d %H:%M:%S")
 	if err != nil {
 		log.Fatal(err)

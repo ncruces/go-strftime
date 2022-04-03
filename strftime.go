@@ -1,4 +1,3 @@
-// Package strftime provides strftime/strptime compatible time formatting and parsing.
 package strftime
 
 import (
@@ -93,6 +92,8 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 			dst = strconv.AppendInt(dst, int64(h), 10)
 		case 's':
 			dst = strconv.AppendInt(dst, t.Unix(), 10)
+		case 'Q':
+			dst = strconv.AppendInt(dst, t.UnixMilli(), 10)
 		}
 		return nil
 	}
