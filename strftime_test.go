@@ -1,6 +1,8 @@
 package strftime_test
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -102,4 +104,24 @@ func TestUTS35(t *testing.T) {
 			t.Errorf("UTS35(%q) = %q, want %q", test.format, got, test.uts35)
 		}
 	}
+}
+
+func Example_convertToGoTimeLayout() {
+	layout, err := strftime.Layout("%Y-%m-%d %H:%M:%S")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%q", layout)
+	// Output:
+	// "2006-01-02 15:04:05"
+}
+
+func Example_convertToNSDateFormatterPattern() {
+	layout, err := strftime.UTS35("%Y-%m-%d %H:%M:%S")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("%q", layout)
+	// Output:
+	// "yyyy-MM-dd HH:mm:ss"
 }
