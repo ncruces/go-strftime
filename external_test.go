@@ -74,14 +74,14 @@ func TestFormat_ruby(t *testing.T) {
 			t.Skip(err)
 		}
 
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
 		ref := reference.Format(time.RFC3339Nano)
+		ctx, cancel := context.WithCancel(context.Background())
+		t.Cleanup(cancel)
 
 		ruby := func(t *testing.T, format string) {
 			script := fmt.Sprintf("print(DateTime.parse(%q).strftime(%q))", ref, format)
 			cmd := exec.CommandContext(ctx, exe, "-e", "require 'date'", "-e", script)
+			t.Parallel()
 
 			want, err := cmd.CombinedOutput()
 			if err != nil {

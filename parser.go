@@ -1,15 +1,11 @@
 package strftime
 
 type parser struct {
-	fmt      string
-	basic    func(byte) string
-	unpadded func(byte) string
-	writeLit func(byte) error
-	writeFmt func(string) error
-	fallback func(spec byte, pad bool) error
+	format  func(spec, flag byte) error
+	literal func(byte) error
 }
 
-func (p *parser) parse() error {
+func (p *parser) parse(fmt string) error {
 	const (
 		initial = iota
 		specifier
@@ -18,35 +14,25 @@ func (p *parser) parse() error {
 
 	var err error
 	state := initial
-	for _, b := range []byte(p.fmt) {
+	for _, b := range []byte(fmt) {
 		switch state {
 		default:
 			if b == '%' {
 				state = specifier
-			} else {
-				err = p.writeLit(b)
+				continue
 			}
+			err = p.literal(b)
 
 		case specifier:
 			if b == '-' {
 				state = nopadding
 				continue
 			}
-			if fmt := p.basic(b); fmt != "" {
-				err = p.writeFmt(fmt)
-			} else {
-				err = p.fallback(b, true)
-			}
+			err = p.format(b, '0')
 			state = initial
 
 		case nopadding:
-			if fmt := p.unpadded(b); fmt != "" {
-				err = p.writeFmt(fmt)
-			} else if fmt := p.basic(b); fmt != "" {
-				err = p.writeFmt(fmt)
-			} else {
-				err = p.fallback(b, false)
-			}
+			err = p.format(b, 0)
 			state = initial
 		}
 
@@ -59,12 +45,12 @@ func (p *parser) parse() error {
 	default:
 		return nil
 	case specifier:
-		return p.writeLit('%')
+		return p.literal('%')
 	case nopadding:
-		err := p.writeLit('%')
+		err := p.literal('%')
 		if err != nil {
 			return err
 		}
-		return p.writeLit('-')
+		return p.literal('-')
 	}
 }

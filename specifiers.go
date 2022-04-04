@@ -1,8 +1,27 @@
 package strftime
 
 // https://strftime.org/
-func goLayout(s byte) string {
-	switch s {
+func goLayout(spec, pad byte) string {
+	if pad == 0 {
+		switch spec {
+		case 'm':
+			return "1"
+		case 'd':
+			return "2"
+		case 'I':
+			return "3"
+		case 'M':
+			return "4"
+		case 'S':
+			return "5"
+		case 'j':
+			return ""
+		case 'H':
+			return ""
+		}
+	}
+
+	switch spec {
 	default:
 		return ""
 
@@ -75,27 +94,28 @@ func goLayout(s byte) string {
 	}
 }
 
-// https://strftime.org/
-func goLayoutUnpadded(s byte) string {
-	switch s {
-	default:
-		return ""
-	case 'm':
-		return "1"
-	case 'd':
-		return "2"
-	case 'I':
-		return "3"
-	case 'M':
-		return "4"
-	case 'S':
-		return "5"
-	}
-}
-
 // https://nsdateformatter.com/
-func uts35Pattern(s byte) string {
-	switch s {
+func uts35Pattern(spec, pad byte) string {
+	if pad == 0 {
+		switch spec {
+		case 'm':
+			return "M"
+		case 'd':
+			return "d"
+		case 'j':
+			return "D"
+		case 'H':
+			return "H"
+		case 'I':
+			return "h"
+		case 'M':
+			return "m"
+		case 'S':
+			return "s"
+		}
+	}
+
+	switch spec {
 	default:
 		return ""
 
@@ -173,26 +193,5 @@ func uts35Pattern(s byte) string {
 		return "\t"
 	case 'n':
 		return "\n"
-	}
-}
-
-func uts35PatternUnpadded(s byte) string {
-	switch s {
-	default:
-		return ""
-	case 'm':
-		return "M"
-	case 'd':
-		return "d"
-	case 'j':
-		return "D"
-	case 'H':
-		return "H"
-	case 'I':
-		return "h"
-	case 'M':
-		return "m"
-	case 'S':
-		return "s"
 	}
 }

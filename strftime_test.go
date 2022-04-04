@@ -48,14 +48,14 @@ var timeTests = []struct {
 	{"%V/%G", "", "ww/YYYY", "32/2009"},
 	{"%Cth Century Fox", "", "", "20th Century Fox"},
 	{"%-d-%-m-%Y", "2-1-2006", "d-M-yyyy", "7-8-2009"},
-	{"%-Hh%-Mm%-Ss", "15h4m5s", "H'h'm'm's's'", "06h5m4s"}, // FIXME: Format zero pads %-H
+	{"%-Hh%-Mm%-Ss", "", "H'h'm'm's's'", "6h5m4s"},
 	{"%-I o'clock", "3 o'clock", "h 'o''clock'", "6 o'clock"},
 	{"%-M past %-I %p", "4 past 3 PM", "m 'past 'h a", "5 past 6 AM"},
 	{"%-A, the %uth day of the week", "", "", "Friday, the 5th day of the week"},
 	{"%fμs since %T", "", "SSSSSSμ's since 'HH:mm:ss", "300000μs since 06:05:04"},
 	{"%Nns since %T", "", "SSSSSSSSS'ns since 'HH:mm:ss", "300000000ns since 06:05:04"},
 	{"%-S.%Ls since %R", "5.000s since 15:04", "s.SSS's since 'HH:mm", "4.300s since 06:05"},
-	{"zero padded %-j is %j", "zero padded 002 is 002", "'zero padded 'D 'is 'DDD", "zero padded 219 is 219"},
+	{"zero padded %-j is %j", "", "'zero padded 'D 'is 'DDD", "zero padded 219 is 219"},
 	// Parsing
 	{"", "", "", ""},
 	{"%", "%", "%", "%"},
