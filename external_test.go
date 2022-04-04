@@ -3,6 +3,9 @@
 package strftime_test
 
 import (
+	"context"
+	"fmt"
+	"os/exec"
 	"testing"
 	"time"
 
@@ -60,6 +63,44 @@ func TestFormat_ruby(t *testing.T) {
 			t.Errorf("Format(%q) = %q, want %q", test.format, got, test.time)
 		}
 	}
+
+	t.Run("exec", func(t *testing.T) {
+		if testing.Short() {
+			t.SkipNow()
+		}
+
+		exe, err := exec.LookPath("ruby")
+		if err != nil {
+			t.Skip(err)
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		ref := reference.Format(time.RFC3339Nano)
+
+		ruby := func(t *testing.T, format string) {
+			script := fmt.Sprintf("print(DateTime.parse(%q).strftime(%q))", ref, format)
+			cmd := exec.CommandContext(ctx, exe, "-e", "require 'date'", "-e", script)
+
+			want, err := cmd.CombinedOutput()
+			if err != nil {
+				t.Error(err)
+			}
+
+			if got := strftime.Format(format, reference); got != string(want) {
+				t.Logf("Format(%q) = %q, ruby wants %q", format, got, string(want))
+			}
+		}
+
+		for _, test := range tests {
+			t.Run("", func(t *testing.T) { ruby(t, test.format) })
+		}
+
+		for _, test := range timeTests {
+			t.Run("", func(t *testing.T) { ruby(t, test.format) })
+		}
+	})
 }
 
 func TestFormat_tebeka(t *testing.T) {
