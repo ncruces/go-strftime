@@ -92,7 +92,7 @@ func TestFormat_Unix(t *testing.T) {
 	}
 
 	if got := strftime.Format("%Q", tm); got != "123456789" {
-		t.Errorf("Format(%q) = %q, want %q", "%s", got, "123456789")
+		t.Errorf("Format(%q) = %q, want %q", "%Q", got, "123456789")
 	}
 }
 
@@ -102,6 +102,17 @@ func TestLayout(t *testing.T) {
 			t.Errorf("Layout(%q) = %v", test.format, err)
 		} else if got != test.layout {
 			t.Errorf("Layout(%q) = %q, want %q", test.format, got, test.layout)
+		}
+	}
+}
+
+func TestLayout_Format(t *testing.T) {
+	for _, test := range timeTests {
+		if test.layout == "" {
+			continue
+		}
+		if got := reference.Format(test.layout); got != test.time {
+			t.Errorf("Format(%q) = %q, want %q", test.layout, got, test.time)
 		}
 	}
 }

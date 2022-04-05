@@ -40,7 +40,7 @@ Format supports the following specifiers:
 
     %L - Millisecond of the second (000..999)
     %f - Microsecond of the second (000000..999999)
-    %N - Nanosecond of the second (000000000..999999999)
+    %N - Nanosecond of the second  (000000000..999999999)
 
   Time zone:
     %z - Time zone as hour and minute offset from UTC (e.g. +0900)
