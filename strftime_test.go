@@ -51,10 +51,13 @@ var timeTests = []struct {
 	{"%-Hh%-Mm%-Ss", "", "H'h'm'm's's'", "6h5m4s"},
 	{"%-I o'clock", "3 o'clock", "h 'o''clock'", "6 o'clock"},
 	{"%-M past %-I %p", "4 past 3 PM", "m 'past 'h a", "5 past 6 AM"},
-	{"%-A, the %uth day of the week", "", "", "Friday, the 5th day of the week"},
 	{"%fμs since %T", "", "SSSSSSμ's since 'HH:mm:ss", "300000μs since 06:05:04"},
 	{"%Nns since %T", "", "SSSSSSSSS'ns since 'HH:mm:ss", "300000000ns since 06:05:04"},
 	{"%-S.%Ls since %R", "5.000s since 15:04", "s.SSS's since 'HH:mm", "4.300s since 06:05"},
+	{"%-S,%fs since %R", "5,000000s since 15:04", "s,SSSSSS's since 'HH:mm", "4,300000s since 06:05"},
+	{"%-S.%Ns since %R", "5.000000000s since 15:04", "s.SSSSSSSSS's since 'HH:mm", "4.300000000s since 06:05"},
+	{"%-A, is day #%u of the week", "", "", "Friday, is day #5 of the week"},
+	{"%-B, is month #%-m of the year", "January, is month #1 of the year", "MMMM, 'is month #'M 'of the year'", "August, is month #8 of the year"},
 	{"zero padded %-j is %j", "", "'zero padded 'D 'is 'DDD", "zero padded 219 is 219"},
 	// Parsing
 	{"", "", "", ""},
@@ -93,6 +96,93 @@ func TestFormat_Unix(t *testing.T) {
 
 	if got := strftime.Format("%Q", tm); got != "123456789" {
 		t.Errorf("Format(%q) = %q, want %q", "%Q", got, "123456789")
+	}
+}
+
+func TestFormat_Hour(t *testing.T) {
+	hours := []struct{ hour12, hour24 string }{
+		0:  {"12", " 0"},
+		1:  {" 1", " 1"},
+		2:  {" 2", " 2"},
+		3:  {" 3", " 3"},
+		4:  {" 4", " 4"},
+		5:  {" 5", " 5"},
+		6:  {" 6", " 6"},
+		7:  {" 7", " 7"},
+		8:  {" 8", " 8"},
+		9:  {" 9", " 9"},
+		10: {"10", "10"},
+		11: {"11", "11"},
+		12: {"12", "12"},
+		13: {" 1", "13"},
+		14: {" 2", "14"},
+		15: {" 3", "15"},
+		16: {" 4", "16"},
+		17: {" 5", "17"},
+		18: {" 6", "18"},
+		19: {" 7", "19"},
+		20: {" 8", "20"},
+		21: {" 9", "21"},
+		22: {"10", "22"},
+		23: {"11", "23"},
+	}
+
+	for h := 0; h < len(hours); h++ {
+		base := reference.Add(time.Duration(h) * time.Hour)
+		want := hours[base.Hour()]
+		if got := strftime.Format("%l", base); got != want.hour12 {
+			t.Errorf("Format(%q) = %q, want %q", "%l", got, want.hour12)
+		}
+		if got := strftime.Format("%k", base); got != want.hour24 {
+			t.Errorf("Format(%q) = %q, want %q", "%k", got, want.hour24)
+		}
+	}
+}
+
+func TestFormat_Weekday(t *testing.T) {
+	weekdays := []struct{ sunday0, sunday7 string }{
+		time.Sunday:    {"0", "7"},
+		time.Monday:    {"1", "1"},
+		time.Tuesday:   {"2", "2"},
+		time.Wednesday: {"3", "3"},
+		time.Thursday:  {"4", "4"},
+		time.Friday:    {"5", "5"},
+		time.Saturday:  {"6", "6"},
+	}
+
+	for d := 0; d < len(weekdays); d++ {
+		base := reference.AddDate(0, 0, d)
+		want := weekdays[base.Weekday()]
+		if got := strftime.Format("%w", base); got != want.sunday0 {
+			t.Errorf("Format(%q) = %q, want %q", "%w", got, want.sunday0)
+		}
+		if got := strftime.Format("%u", base); got != want.sunday7 {
+			t.Errorf("Format(%q) = %q, want %q", "%u", got, want.sunday7)
+		}
+	}
+}
+
+func TestFormat_WeekNumber(t *testing.T) {
+	for y := 2000; y < 2020; y++ {
+		sunday := "00"
+		monday := "00"
+		for d := 1; d < 8; d++ {
+			base := time.Date(y, time.January, d, 0, 0, 0, 0, time.UTC)
+
+			switch base.Weekday() {
+			case time.Sunday:
+				sunday = "01"
+			case time.Monday:
+				monday = "01"
+			}
+
+			if got := strftime.Format("%U", base); got != sunday {
+				t.Errorf("Format(%q, %d) = %q, want %q", "%U", base.Unix(), got, sunday)
+			}
+			if got := strftime.Format("%W", base); got != monday {
+				t.Errorf("Format(%q, %d) = %q, want %q", "%W", base.Unix(), got, monday)
+			}
+		}
 	}
 }
 

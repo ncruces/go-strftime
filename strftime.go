@@ -56,9 +56,9 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 			_, w := t.ISOWeek()
 			dst = appendInt2(dst, w, pad)
 		case 'W':
-			dst = appendWeekNumber(dst, t, pad, true)
-		case 'U':
 			dst = appendWeekNumber(dst, t, pad, false)
+		case 'U':
+			dst = appendWeekNumber(dst, t, pad, true)
 		case 'w':
 			w := t.Weekday()
 			dst = appendInt1(dst, int(w))
@@ -145,7 +145,7 @@ func Layout(fmt string) (string, error) {
 		case 'L', 'f', 'N':
 			if bytes.HasSuffix(dst, []byte(".")) || bytes.HasSuffix(dst, []byte(",")) {
 				switch spec {
-				case 'L':
+				default:
 					dst = append(dst, "000"...)
 				case 'f':
 					dst = append(dst, "000000"...)
@@ -219,22 +219,14 @@ func buffer(format string) (buf []byte) {
 	return
 }
 
-func appendWeekNumber(dst []byte, t time.Time, pad byte, monday bool) []byte {
-	day := t.YearDay()
+func appendWeekNumber(dst []byte, t time.Time, pad byte, sunday bool) []byte {
 	offset := int(t.Weekday())
-	if monday {
-		if offset == 0 {
-			offset = 6
-		} else {
-			offset--
-		}
+	if sunday {
+		offset = 6 - offset
+	} else if offset != 0 {
+		offset = 7 - offset
 	}
-
-	var n int
-	if day >= offset {
-		n = (day-offset)/7 + 1
-	}
-	return appendInt2(dst, n, pad)
+	return appendInt2(dst, (t.YearDay()+offset)/7, pad)
 }
 
 func appendInt1(dst []byte, i int) []byte {

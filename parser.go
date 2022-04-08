@@ -42,15 +42,11 @@ func (p *parser) parse(fmt string) error {
 	}
 
 	switch state {
-	default:
-		return nil
 	case specifier:
-		return p.literal('%')
+		p.literal('%')
 	case nopadding:
-		err := p.literal('%')
-		if err != nil {
-			return err
-		}
-		return p.literal('-')
+		p.literal('%')
+		p.literal('-')
 	}
+	return nil
 }
