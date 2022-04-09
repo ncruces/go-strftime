@@ -69,6 +69,8 @@ var timeTests = []struct {
 	{"%q", "", "", "%q"},
 	{"%-q", "", "", "%-q"},
 	{"'", "'", "''", "'"},
+	{"0", "", "0", "0"},
+	{"9", "", "9", "9"},
 	{"100%", "", "100%", "100%"},
 	{"Monday", "", "'Monday'", "Monday"},
 	{"January", "", "'January'", "January"},
@@ -183,6 +185,22 @@ func TestFormat_WeekNumber(t *testing.T) {
 				t.Errorf("Format(%q, %d) = %q, want %q", "%W", base.Unix(), got, monday)
 			}
 		}
+	}
+}
+
+func TestParse(t *testing.T) {
+	for _, test := range timeTests {
+		if got, err := strftime.Parse(test.format, test.time); err != nil && test.layout != "" {
+			t.Errorf("Parse(%q) = %v", test.format, err)
+		} else if err != nil && !got.IsZero() {
+			t.Errorf("Parse(%q) = %v", test.format, got)
+		} else if then := strftime.Format(test.format, got); err == nil && then != test.time {
+			t.Errorf("Parse(%q) = %q, want %q", test.format, got, test.time)
+		}
+	}
+
+	if got, err := strftime.Parse("%C", ""); err == nil || !got.IsZero() {
+		t.Errorf("Parse(%q) = %v", "%C", got)
 	}
 }
 

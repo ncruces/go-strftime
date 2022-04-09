@@ -1,3 +1,5 @@
+//go:build reference
+
 package strftime_test
 
 import (
@@ -38,7 +40,7 @@ func TestFormat_ruby(t *testing.T) {
 			}
 
 			if got := strftime.Format(format, reference); got != string(want) {
-				t.Logf("Format(%q) = %q, ruby wants %q", format, got, string(want))
+				t.Errorf("Format(%q) = %q, ruby wants %q", format, got, string(want))
 			}
 		}
 	}
@@ -84,7 +86,7 @@ func TestFormat_osascript(t *testing.T) {
 			want = bytes.TrimSuffix(want, []byte("\n"))
 
 			if got := strftime.Format(format, reference); got != string(want) {
-				t.Logf("Format(%q) = %q, osascript wants %q", format, got, string(want))
+				t.Errorf("Format(%q) = %q, osascript wants %q", format, got, string(want))
 			}
 		}
 	}

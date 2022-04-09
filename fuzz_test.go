@@ -3,6 +3,7 @@
 package strftime_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/ncruces/go-strftime"
@@ -13,10 +14,13 @@ func FuzzFormat(f *testing.F) {
 		f.Add(test.format)
 	}
 
-	f.Fuzz(func(t *testing.T, fmt string) {
-		s := strftime.Format(fmt, reference)
-		if s == "" && fmt != "" {
-			t.Errorf("Format(%q) = %q", fmt, s)
+	f.Fuzz(func(t *testing.T, format string) {
+		str := strftime.Format(format, reference)
+		if str == "" && format != "" {
+			t.Errorf("Format(%q) = %q", format, str)
+		}
+		if str != format && !strings.Contains(format, "%") {
+			t.Errorf("Format(%q) = %q", format, str)
 		}
 	})
 }
@@ -27,9 +31,9 @@ func FuzzParse(f *testing.F) {
 	}
 
 	f.Fuzz(func(t *testing.T, format, value string) {
-		tm, err := strftime.Parse(format, value)
-		if tm.IsZero() && err == nil {
-			t.Errorf("Parse(%q, %q) = (%v, %v)", format, value, tm, err)
+		parsed, err := strftime.Parse(format, value)
+		if err != nil && !parsed.IsZero() {
+			t.Errorf("Parse(%q, %q) = (%v, %v)", format, value, parsed, err)
 		}
 	})
 }
@@ -41,7 +45,10 @@ func FuzzLayout(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, format string) {
 		layout, err := strftime.Layout(format)
-		if format != "" && layout == "" && err == nil {
+		if err != nil && layout != "" {
+			t.Errorf("Layout(%q) = %v", format, err)
+		}
+		if err == nil && layout == "" && format != "" {
 			t.Errorf("Layout(%q) = (%q, %v)", format, layout, err)
 		}
 	})
@@ -54,7 +61,10 @@ func FuzzUTS35(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, format string) {
 		pattern, err := strftime.UTS35(format)
-		if format != "" && pattern == "" && err == nil {
+		if err != nil && pattern != "" {
+			t.Errorf("UTS35(%q) = %v", format, err)
+		}
+		if err == nil && pattern == "" && format != "" {
 			t.Errorf("UTS35(%q) = (%q, %v)", format, pattern, err)
 		}
 	})

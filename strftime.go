@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
 // Format returns a textual representation of the time value
@@ -19,12 +20,12 @@ func Format(fmt string, t time.Time) string {
 func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 	var parser parser
 
-	parser.literal = func(b byte) error {
-		dst = append(dst, b)
+	parser.literal = func(i int, lit byte) error {
+		dst = append(dst, lit)
 		return nil
 	}
 
-	parser.format = func(spec, pad byte) error {
+	parser.format = func(i int, spec, pad byte) error {
 		if layout := goLayout(spec, pad); layout != "" {
 			dst = t.AppendFormat(dst, layout)
 			return nil
@@ -110,12 +111,12 @@ func Layout(fmt string) (string, error) {
 	dst := buffer(fmt)
 	var parser parser
 
-	parser.literal = func(b byte) error {
-		if '0' <= b && b <= '9' {
-			return errors.New("strftime: unsupported literal: '" + string(b) + "'")
+	parser.literal = func(i int, lit byte) error {
+		if '0' <= lit && lit <= '9' {
+			return errors.New("strftime: unsupported literal: '" + string(lit) + "'")
 		}
-		dst = append(dst, b)
-		if b == 'M' || b == 'T' || b == 'm' || b == 'n' {
+		dst = append(dst, lit)
+		if lit == 'M' || lit == 'T' || lit == 'm' || lit == 'n' {
 			switch {
 			case bytes.HasSuffix(dst, []byte("Jan")):
 				return errors.New("strftime: unsupported literal: 'Jan'")
@@ -132,7 +133,7 @@ func Layout(fmt string) (string, error) {
 		return nil
 	}
 
-	parser.format = func(spec, pad byte) error {
+	parser.format = func(i int, spec, pad byte) error {
 		if layout := goLayout(spec, pad); layout != "" {
 			dst = append(dst, layout...)
 			return nil
@@ -140,7 +141,7 @@ func Layout(fmt string) (string, error) {
 
 		switch spec {
 		default:
-			return errors.New("strftime: unsupported specifier: %" + string(spec))
+			return errors.New("strftime: unsupported specifier: %" + runeSubstr(fmt, i))
 
 		case 'L', 'f', 'N':
 			if bytes.HasSuffix(dst, []byte(".")) || bytes.HasSuffix(dst, []byte(",")) {
@@ -168,40 +169,40 @@ func Layout(fmt string) (string, error) {
 // to a Unicode Technical Standard #35 Date Format Pattern.
 func UTS35(fmt string) (string, error) {
 	const quote = '\''
-	var literal bool
+	var quoted bool
 	dst := buffer(fmt)
 
 	var parser parser
 
-	parser.literal = func(b byte) error {
-		if b == quote {
+	parser.literal = func(i int, lit byte) error {
+		if lit == quote {
 			dst = append(dst, quote, quote)
 			return nil
 		}
-		if !literal && ('a' <= b && b <= 'z' || 'A' <= b && b <= 'Z') {
+		if !quoted && ('a' <= lit && lit <= 'z' || 'A' <= lit && lit <= 'Z') {
 			dst = append(dst, quote)
-			literal = true
+			quoted = true
 		}
-		dst = append(dst, b)
+		dst = append(dst, lit)
 		return nil
 	}
 
-	parser.format = func(spec, pad byte) error {
-		if literal {
+	parser.format = func(i int, spec, pad byte) error {
+		if quoted {
 			dst = append(dst, quote)
-			literal = false
+			quoted = false
 		}
 		if pattern := uts35Pattern(spec, pad); pattern != "" {
 			dst = append(dst, pattern...)
 			return nil
 		}
-		return errors.New("strftime: unsupported specifier: %" + string(spec))
+		return errors.New("strftime: unsupported specifier: %" + runeSubstr(fmt, i))
 	}
 
 	if err := parser.parse(fmt); err != nil {
 		return "", err
 	}
-	if literal {
+	if quoted {
 		dst = append(dst, quote)
 	}
 	return string(dst), nil
@@ -253,3 +254,8 @@ const smallsString = "00010203040506070809" +
 	"70717273747576777879" +
 	"80818283848586878889" +
 	"90919293949596979899"
+
+func runeSubstr(str string, i int) string {
+	_, n := utf8.DecodeLastRuneInString(str[i:])
+	return str[i : i+n]
+}

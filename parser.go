@@ -1,8 +1,8 @@
 package strftime
 
 type parser struct {
-	format  func(spec, flag byte) error
-	literal func(byte) error
+	format  func(i int, spec, flag byte) error
+	literal func(i int, lit byte) error
 }
 
 func (p *parser) parse(fmt string) error {
@@ -14,25 +14,25 @@ func (p *parser) parse(fmt string) error {
 
 	var err error
 	state := initial
-	for _, b := range []byte(fmt) {
+	for i, b := range []byte(fmt) {
 		switch state {
 		default:
 			if b == '%' {
 				state = specifier
 				continue
 			}
-			err = p.literal(b)
+			err = p.literal(i, b)
 
 		case specifier:
 			if b == '-' {
 				state = nopadding
 				continue
 			}
-			err = p.format(b, '0')
+			err = p.format(i, b, '0')
 			state = initial
 
 		case nopadding:
-			err = p.format(b, 0)
+			err = p.format(i, b, 0)
 			state = initial
 		}
 
@@ -43,10 +43,10 @@ func (p *parser) parse(fmt string) error {
 
 	switch state {
 	case specifier:
-		p.literal('%')
+		p.literal(0, '%')
 	case nopadding:
-		p.literal('%')
-		p.literal('-')
+		p.literal(0, '%')
+		p.literal(0, '-')
 	}
 	return nil
 }
