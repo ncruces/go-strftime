@@ -27,9 +27,7 @@ func goLayout(spec, pad byte) string {
 
 	case 'B':
 		return "January"
-	case 'b':
-		return "Jan"
-	case 'h':
+	case 'b', 'h':
 		return "Jan"
 	case 'm':
 		return "01"
@@ -43,18 +41,18 @@ func goLayout(spec, pad byte) string {
 		return "02"
 	case 'j':
 		return "002"
-	case 'H':
-		return "15"
 	case 'I':
 		return "03"
+	case 'H':
+		return "15"
 	case 'M':
 		return "04"
 	case 'S':
 		return "05"
-	case 'Y':
-		return "2006"
 	case 'y':
 		return "06"
+	case 'Y':
+		return "2006"
 	case 'p':
 		return "PM"
 	case 'P':
@@ -104,10 +102,10 @@ func uts35Pattern(spec, pad byte) string {
 			return "d"
 		case 'j':
 			return "D"
-		case 'H':
-			return "H"
 		case 'I':
 			return "h"
+		case 'H':
+			return "H"
 		case 'M':
 			return "m"
 		case 'S':
@@ -121,9 +119,7 @@ func uts35Pattern(spec, pad byte) string {
 
 	case 'B':
 		return "MMMM"
-	case 'b':
-		return "MMM"
-	case 'h':
+	case 'b', 'h':
 		return "MMM"
 	case 'm':
 		return "MM"
@@ -135,22 +131,22 @@ func uts35Pattern(spec, pad byte) string {
 		return "dd"
 	case 'j':
 		return "DDD"
-	case 'H':
-		return "HH"
 	case 'I':
 		return "hh"
+	case 'H':
+		return "HH"
 	case 'M':
 		return "mm"
 	case 'S':
 		return "ss"
-	case 'Y':
-		return "yyyy"
 	case 'y':
 		return "yy"
-	case 'G':
-		return "YYYY"
+	case 'Y':
+		return "yyyy"
 	case 'g':
 		return "YY"
+	case 'G':
+		return "YYYY"
 	case 'V':
 		return "ww"
 	case 'p':

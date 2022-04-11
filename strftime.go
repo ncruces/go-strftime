@@ -26,68 +26,119 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 	}
 
 	parser.format = func(i int, spec, pad byte) error {
-		if layout := goLayout(spec, pad); layout != "" {
-			dst = t.AppendFormat(dst, layout)
-			return nil
-		}
-
 		switch spec {
-		default:
-			dst = append(dst, '%')
-			if pad == 0 {
-				dst = append(dst, '-')
-			}
-			dst = append(dst, spec)
+		case 'A':
+			dst = append(dst, t.Weekday().String()...)
+			return nil
+		case 'a':
+			dst = append(dst, t.Weekday().String()[:3]...)
+			return nil
+		case 'B':
+			dst = append(dst, t.Month().String()...)
+			return nil
+		case 'b', 'h':
+			dst = append(dst, t.Month().String()[:3]...)
+			return nil
+		case 'm':
+			dst = appendInt2(dst, int(t.Month()), pad)
+			return nil
+		case 'd':
+			dst = appendInt2(dst, int(t.Day()), pad)
+			return nil
+		case 'e':
+			dst = appendInt2(dst, int(t.Day()), ' ')
+			return nil
+		case 'I':
+			dst = append12Hour(dst, t, pad)
+			return nil
+		case 'l':
+			dst = append12Hour(dst, t, ' ')
+			return nil
+		case 'H':
+			dst = appendInt2(dst, t.Hour(), pad)
+			return nil
+		case 'k':
+			dst = appendInt2(dst, t.Hour(), ' ')
+			return nil
+		case 'M':
+			dst = appendInt2(dst, t.Minute(), pad)
+			return nil
+		case 'S':
+			dst = appendInt2(dst, t.Second(), pad)
+			return nil
 		case 'L':
 			dst = append(dst, t.Format(".000")[1:]...)
+			return nil
 		case 'f':
 			dst = append(dst, t.Format(".000000")[1:]...)
+			return nil
 		case 'N':
 			dst = append(dst, t.Format(".000000000")[1:]...)
+			return nil
+		case 'y':
+			dst = t.AppendFormat(dst, "06")
+			return nil
+		case 'Y':
+			dst = t.AppendFormat(dst, "2006")
+			return nil
 		case 'C':
 			dst = t.AppendFormat(dst, "2006")
 			dst = dst[:len(dst)-2]
-		case 'g':
-			y, _ := t.ISOWeek()
-			dst = time.Date(y, 1, 1, 0, 0, 0, 0, time.UTC).AppendFormat(dst, "06")
-		case 'G':
-			y, _ := t.ISOWeek()
-			dst = time.Date(y, 1, 1, 0, 0, 0, 0, time.UTC).AppendFormat(dst, "2006")
+			return nil
+		case 'U':
+			dst = appendWeekNumber(dst, t, pad, true)
+			return nil
+		case 'W':
+			dst = appendWeekNumber(dst, t, pad, false)
+			return nil
 		case 'V':
 			_, w := t.ISOWeek()
 			dst = appendInt2(dst, w, pad)
-		case 'W':
-			dst = appendWeekNumber(dst, t, pad, false)
-		case 'U':
-			dst = appendWeekNumber(dst, t, pad, true)
+			return nil
+		case 'g':
+			y, _ := t.ISOWeek()
+			dst = time.Date(y, 1, 1, 0, 0, 0, 0, time.UTC).AppendFormat(dst, "06")
+			return nil
+		case 'G':
+			y, _ := t.ISOWeek()
+			dst = time.Date(y, 1, 1, 0, 0, 0, 0, time.UTC).AppendFormat(dst, "2006")
+			return nil
+		case 's':
+			dst = strconv.AppendInt(dst, t.Unix(), 10)
+			return nil
+		case 'Q':
+			dst = strconv.AppendInt(dst, t.UnixMilli(), 10)
+			return nil
 		case 'w':
 			w := t.Weekday()
 			dst = appendInt1(dst, int(w))
+			return nil
 		case 'u':
 			if w := t.Weekday(); w == 0 {
 				dst = append(dst, '7')
 			} else {
 				dst = appendInt1(dst, int(w))
 			}
-		case 'H':
-			dst = appendInt2(dst, t.Hour(), pad)
-		case 'k':
-			dst = appendInt2(dst, t.Hour(), ' ')
-		case 'l':
-			h := t.Hour()
-			if h == 0 {
-				h = 12
-			} else if h > 12 {
-				h -= 12
-			}
-			dst = appendInt2(dst, h, ' ')
+			return nil
 		case 'j':
-			dst = strconv.AppendInt(dst, int64(t.YearDay()), 10)
-		case 's':
-			dst = strconv.AppendInt(dst, t.Unix(), 10)
-		case 'Q':
-			dst = strconv.AppendInt(dst, t.UnixMilli(), 10)
+			if pad == '0' {
+				dst = t.AppendFormat(dst, "002")
+			} else {
+				dst = strconv.AppendInt(dst, int64(t.YearDay()), 10)
+			}
+			return nil
 		}
+
+		if layout := goLayout(spec, pad); layout != "" {
+			dst = t.AppendFormat(dst, layout)
+			return nil
+		}
+
+		dst = append(dst, '%')
+		if pad == 0 {
+			dst = append(dst, '-')
+		}
+		dst = append(dst, spec)
 		return nil
 	}
 
@@ -228,6 +279,16 @@ func appendWeekNumber(dst []byte, t time.Time, pad byte, sunday bool) []byte {
 		offset = 7 - offset
 	}
 	return appendInt2(dst, (t.YearDay()+offset)/7, pad)
+}
+
+func append12Hour(dst []byte, t time.Time, pad byte) []byte {
+	h := t.Hour()
+	if h == 0 {
+		h = 12
+	} else if h > 12 {
+		h -= 12
+	}
+	return appendInt2(dst, h, pad)
 }
 
 func appendInt1(dst []byte, i int) []byte {

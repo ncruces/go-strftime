@@ -56,9 +56,10 @@ var timeTests = []struct {
 	{"%-S.%Ls since %R", "5.000s since 15:04", "s.SSS's since 'HH:mm", "4.300s since 06:05"},
 	{"%-S,%fs since %R", "5,000000s since 15:04", "s,SSSSSS's since 'HH:mm", "4,300000s since 06:05"},
 	{"%-S.%Ns since %R", "5.000000000s since 15:04", "s.SSSSSSSSS's since 'HH:mm", "4.300000000s since 06:05"},
-	{"%-A, is day #%u of the week", "", "", "Friday, is day #5 of the week"},
 	{"%-B, is month #%-m of the year", "January, is month #1 of the year", "MMMM, 'is month #'M 'of the year'", "August, is month #8 of the year"},
-	{"zero padded %-j is %j", "", "'zero padded 'D 'is 'DDD", "zero padded 219 is 219"},
+	{"%-d-%b-%Y is day %j of the year", "2-Jan-2006 is day 002 of the year", "d-MMM-yyyy 'is day 'DDD 'of the year'", "7-Aug-2009 is day 219 of the year"},
+	{"%-d-%b-%Y is day %-j of the year", "", "d-MMM-yyyy 'is day 'D 'of the year'", "7-Aug-2009 is day 219 of the year"},
+	{"%-A, is day #%u of the week", "", "", "Friday, is day #5 of the week"},
 	// Parsing
 	{"", "", "", ""},
 	{"%", "%", "%", "%"},
