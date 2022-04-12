@@ -1,26 +1,7 @@
 package strftime
 
 // https://strftime.org/
-func goLayout(spec, pad byte) string {
-	if pad == 0 {
-		switch spec {
-		case 'm':
-			return "1"
-		case 'd':
-			return "2"
-		case 'I':
-			return "3"
-		case 'M':
-			return "4"
-		case 'S':
-			return "5"
-		case 'j':
-			return ""
-		case 'H':
-			return ""
-		}
-	}
-
+func goLayout(spec, flag byte) string {
 	switch spec {
 	default:
 		return ""
@@ -30,6 +11,9 @@ func goLayout(spec, pad byte) string {
 	case 'b', 'h':
 		return "Jan"
 	case 'm':
+		if flag == '-' {
+			return "1"
+		}
 		return "01"
 	case 'A':
 		return "Monday"
@@ -38,16 +22,34 @@ func goLayout(spec, pad byte) string {
 	case 'e':
 		return "_2"
 	case 'd':
+		if flag == '-' {
+			return "2"
+		}
 		return "02"
 	case 'j':
+		if flag == '-' {
+			return ""
+		}
 		return "002"
 	case 'I':
+		if flag == '-' {
+			return "3"
+		}
 		return "03"
 	case 'H':
+		if flag == '-' {
+			return ""
+		}
 		return "15"
 	case 'M':
+		if flag == '-' {
+			return "4"
+		}
 		return "04"
 	case 'S':
+		if flag == '-' {
+			return "5"
+		}
 		return "05"
 	case 'y':
 		return "06"
@@ -60,6 +62,9 @@ func goLayout(spec, pad byte) string {
 	case 'Z':
 		return "MST"
 	case 'z':
+		if flag == ':' {
+			return "-07:00"
+		}
 		return "-0700"
 
 	case '+':
@@ -93,26 +98,7 @@ func goLayout(spec, pad byte) string {
 }
 
 // https://nsdateformatter.com/
-func uts35Pattern(spec, pad byte) string {
-	if pad == 0 {
-		switch spec {
-		case 'm':
-			return "M"
-		case 'd':
-			return "d"
-		case 'j':
-			return "D"
-		case 'I':
-			return "h"
-		case 'H':
-			return "H"
-		case 'M':
-			return "m"
-		case 'S':
-			return "s"
-		}
-	}
-
+func uts35Pattern(spec, flag byte) string {
 	switch spec {
 	default:
 		return ""
@@ -122,22 +108,43 @@ func uts35Pattern(spec, pad byte) string {
 	case 'b', 'h':
 		return "MMM"
 	case 'm':
+		if flag == '-' {
+			return "M"
+		}
 		return "MM"
 	case 'A':
 		return "EEEE"
 	case 'a':
 		return "E"
 	case 'd':
+		if flag == '-' {
+			return "d"
+		}
 		return "dd"
 	case 'j':
+		if flag == '-' {
+			return "D"
+		}
 		return "DDD"
 	case 'I':
+		if flag == '-' {
+			return "h"
+		}
 		return "hh"
 	case 'H':
+		if flag == '-' {
+			return "H"
+		}
 		return "HH"
 	case 'M':
+		if flag == '-' {
+			return "m"
+		}
 		return "mm"
 	case 'S':
+		if flag == '-' {
+			return "s"
+		}
 		return "ss"
 	case 'y':
 		return "yy"
@@ -148,13 +155,19 @@ func uts35Pattern(spec, pad byte) string {
 	case 'G':
 		return "YYYY"
 	case 'V':
+		if flag == '-' {
+			return "w"
+		}
 		return "ww"
 	case 'p':
 		return "a"
 	case 'Z':
 		return "zzz"
 	case 'z':
-		return "Z"
+		if flag == ':' {
+			return "xxx"
+		}
+		return "xx"
 	case 'L':
 		return "SSS"
 	case 'f':

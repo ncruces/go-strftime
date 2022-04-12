@@ -44,6 +44,7 @@ Format supports the following specifiers:
 
   Time zone:
     %z - Time zone as hour and minute offset from UTC (e.g. +0900)
+            %:z - hour and minute offset from UTC with a colon (e.g. +09:00)
     %Z - Time zone abbreviation (e.g. MST)
 
   Weekday:
@@ -59,12 +60,15 @@ Format supports the following specifiers:
     %G - The week-based year
     %g - The last 2 digits of the week-based year (00..99)
     %V - Week number of the week-based year (01..53)
+            %-V  no-padded (1..53)
 
   Week number:
   The week 1 of YYYY starts with a Sunday or Monday (according to %U
   or %W).  The days in the year before the first week are in week 0.
     %U - Week number of the year.  The week starts with Sunday.  (00..53)
+            %-U  no-padded (0..53)
     %W - Week number of the year.  The week starts with Monday.  (00..53)
+            %-W  no-padded (0..53)
 
   Seconds since the Unix Epoch:
     %s - Number of seconds since 1970-01-01 00:00:00 UTC.
