@@ -45,6 +45,10 @@ var timeTests = []struct {
 	{"%I:%M:%S %p", "03:04:05 PM", "hh:mm:ss a", "06:05:04 AM"},
 	// Misc
 	{"%g", "", "YY", "09"},
+	{"%-EC", "", "", "20"},
+	{"%-Od", "2", "d", "7"},
+	{"%Ey", "06", "yy", "09"},
+	{"%Oy", "06", "yy", "09"},
 	{"%:z", "-07:00", "xxx", "+00:00"},
 	{"%V/%G", "", "ww/YYYY", "32/2009"},
 	{"%-V/%G", "", "w/YYYY", "32/2009"},
@@ -199,6 +203,8 @@ func TestParse(t *testing.T) {
 			t.Errorf("Parse(%q) = %v", test.format, got)
 		} else if then := strftime.Format(test.format, got); err == nil && then != test.time {
 			t.Errorf("Parse(%q) = %q, want %q", test.format, got, test.time)
+		} else if err != nil {
+			t.Logf("Parse(%q) = %v", test.format, err)
 		}
 	}
 
@@ -213,6 +219,8 @@ func TestLayout(t *testing.T) {
 			t.Errorf("Layout(%q) = %v", test.format, err)
 		} else if got != test.layout {
 			t.Errorf("Layout(%q) = %q, want %q", test.format, got, test.layout)
+		} else if err != nil {
+			t.Logf("Layout(%q) = %v", test.format, err)
 		}
 	}
 }
@@ -234,6 +242,8 @@ func TestUTS35(t *testing.T) {
 			t.Errorf("UTS35(%q) = %v", test.format, err)
 		} else if got != test.uts35 {
 			t.Errorf("UTS35(%q) = %q, want %q", test.format, got, test.uts35)
+		} else if err != nil {
+			t.Logf("UTS35(%q) = %v", test.format, err)
 		}
 	}
 }

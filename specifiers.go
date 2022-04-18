@@ -1,5 +1,7 @@
 package strftime
 
+import "strings"
+
 // https://strftime.org/
 func goLayout(spec, flag byte) string {
 	switch spec {
@@ -203,4 +205,15 @@ func uts35Pattern(spec, flag byte) string {
 	case 'n':
 		return "\n"
 	}
+}
+
+// http://man.he.net/man3/strftime
+func okModifier(mod, spec byte) bool {
+	if mod == 'E' {
+		return strings.Contains("cCxXyY", string(spec))
+	}
+	if mod == 'O' {
+		return strings.Contains("deHImMSuUVwWy", string(spec))
+	}
+	return false
 }

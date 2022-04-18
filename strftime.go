@@ -2,10 +2,8 @@ package strftime
 
 import (
 	"bytes"
-	"errors"
 	"strconv"
 	"time"
-	"unicode/utf8"
 )
 
 // Format returns a textual representation of the time value
@@ -25,7 +23,7 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 		return nil
 	}
 
-	parser.format = func(spec, flag byte, i int) error {
+	parser.format = func(spec, flag byte) error {
 		switch spec {
 		case 'A':
 			dst = append(dst, t.Weekday().String()...)
@@ -147,7 +145,7 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 }
 
 // Parse converts a textual representation of time to the time value it represents
-// according to the strftime format specification.
+// according to the strptime format specification.
 func Parse(fmt, value string) (time.Time, error) {
 	pattern, err := Layout(fmt)
 	if err != nil {
@@ -164,27 +162,27 @@ func Layout(fmt string) (string, error) {
 
 	parser.literal = func(b byte) error {
 		if '0' <= b && b <= '9' {
-			return errors.New("strftime: unsupported literal: '" + string(b) + "'")
+			return literalErr(b)
 		}
 		dst = append(dst, b)
 		if b == 'M' || b == 'T' || b == 'm' || b == 'n' {
 			switch {
 			case bytes.HasSuffix(dst, []byte("Jan")):
-				return errors.New("strftime: unsupported literal: 'Jan'")
+				return literalErr("Jan")
 			case bytes.HasSuffix(dst, []byte("Mon")):
-				return errors.New("strftime: unsupported literal: 'Mon'")
+				return literalErr("Mon")
 			case bytes.HasSuffix(dst, []byte("MST")):
-				return errors.New("strftime: unsupported literal: 'MST'")
+				return literalErr("MST")
 			case bytes.HasSuffix(dst, []byte("PM")):
-				return errors.New("strftime: unsupported literal: 'PM'")
+				return literalErr("PM")
 			case bytes.HasSuffix(dst, []byte("pm")):
-				return errors.New("strftime: unsupported literal: 'pm'")
+				return literalErr("pm")
 			}
 		}
 		return nil
 	}
 
-	parser.format = func(spec, flag byte, i int) error {
+	parser.format = func(spec, flag byte) error {
 		if layout := goLayout(spec, flag); layout != "" {
 			dst = append(dst, layout...)
 			return nil
@@ -192,7 +190,7 @@ func Layout(fmt string) (string, error) {
 
 		switch spec {
 		default:
-			return errors.New("strftime: unsupported specifier: %" + runeSubstr(fmt, i))
+			return formatError{}
 
 		case 'L', 'f', 'N':
 			if bytes.HasSuffix(dst, []byte(".")) || bytes.HasSuffix(dst, []byte(",")) {
@@ -206,7 +204,7 @@ func Layout(fmt string) (string, error) {
 				}
 				return nil
 			}
-			return errors.New("strftime: unsupported specifier: %" + string(spec) + " must follow '.' or ','")
+			return formatError{message: "must follow '.' or ','"}
 		}
 	}
 
@@ -238,7 +236,7 @@ func UTS35(fmt string) (string, error) {
 		return nil
 	}
 
-	parser.format = func(spec, flag byte, i int) error {
+	parser.format = func(spec, flag byte) error {
 		if quoted {
 			dst = append(dst, quote)
 			quoted = false
@@ -247,7 +245,7 @@ func UTS35(fmt string) (string, error) {
 			dst = append(dst, pattern...)
 			return nil
 		}
-		return errors.New("strftime: unsupported specifier: %" + runeSubstr(fmt, i))
+		return formatError{}
 	}
 
 	if err := parser.parse(fmt); err != nil {
@@ -315,8 +313,3 @@ const smallsString = "00010203040506070809" +
 	"70717273747576777879" +
 	"80818283848586878889" +
 	"90919293949596979899"
-
-func runeSubstr(str string, i int) string {
-	_, n := utf8.DecodeRuneInString(str[i:])
-	return str[i : i+n]
-}

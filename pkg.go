@@ -1,18 +1,18 @@
 /*
 Package strftime provides strftime/strptime compatible time formatting and parsing.
 
-Format supports the following specifiers:
+The following specifiers are available:
 
   Date (Year, Month, Day):
     %Y - Year with century (can be negative, 4 digits at least)
             -0001, 0000, 1995, 2009, 14292, etc.
-    %C - year / 100 (round down. 20 in 2009)
+    %C - year / 100 (round down, 20 in 2009)
     %y - year % 100 (00..99)
 
     %m - Month of the year, zero-padded (01..12)
             %-m  no-padded (1..12)
-    %B - The full month name (January)
-    %b - The abbreviated month name (Jan)
+    %B - Full month name (January)
+    %b - Abbreviated month name (Jan)
     %h - Equivalent to %b
 
     %d - Day of the month, zero-padded  (01..31)
@@ -40,7 +40,7 @@ Format supports the following specifiers:
 
     %L - Millisecond of the second (000..999)
     %f - Microsecond of the second (000000..999999)
-    %N - Nanosecond of the second  (000000000..999999999)
+    %N - Nanosecond  of the second (000000000..999999999)
 
   Time zone:
     %z - Time zone as hour and minute offset from UTC (e.g. +0900)
@@ -48,23 +48,23 @@ Format supports the following specifiers:
     %Z - Time zone abbreviation (e.g. MST)
 
   Weekday:
-    %A - The full weekday name (Sunday)
-    %a - The abbreviated name (Sun)
+    %A - Full weekday name (Sunday)
+    %a - Abbreviated weekday name (Sun)
     %u - Day of the week (Monday is 1, 1..7)
     %w - Day of the week (Sunday is 0, 0..6)
 
   ISO 8601 week-based year and week number:
-  The week 1 of YYYY starts with a Monday and includes YYYY-01-04.
+  Week 1 of YYYY starts with a Monday and includes YYYY-01-04.
   The days in the year before the first week are in the last week of
   the previous year.
-    %G - The week-based year
-    %g - The last 2 digits of the week-based year (00..99)
+    %G - Week-based year
+    %g - Last 2 digits of the week-based year (00..99)
     %V - Week number of the week-based year (01..53)
             %-V  no-padded (1..53)
 
   Week number:
-  The week 1 of YYYY starts with a Sunday or Monday (according to %U
-  or %W).  The days in the year before the first week are in week 0.
+  Week 1 of YYYY starts with a Sunday or Monday (according to %U or %W).
+  The days in the year before the first week are in week 0.
     %U - Week number of the year.  The week starts with Sunday.  (00..53)
             %-U  no-padded (0..53)
     %W - Week number of the year.  The week starts with Monday.  (00..53)
@@ -82,7 +82,7 @@ Format supports the following specifiers:
   Combination:
     %c - date and time (%a %b %e %T %Y)
     %D - Date (%m/%d/%y)
-    %F - The ISO 8601 date format (%Y-%m-%d)
+    %F - ISO 8601 date format (%Y-%m-%d)
     %v - VMS date (%e-%b-%Y)
     %x - Same as %D
     %X - Same as %T
@@ -90,6 +90,8 @@ Format supports the following specifiers:
     %R - 24-hour time (%H:%M)
     %T - 24-hour time (%H:%M:%S)
     %+ - date(1) (%a %b %e %H:%M:%S %Z %Y)
+
+The modifiers ``E'' and ``O'' are ignored.
 
 */
 package strftime
