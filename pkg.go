@@ -92,6 +92,5 @@ The following specifiers are available:
     %+ - date(1) (%a %b %e %H:%M:%S %Z %Y)
 
 The modifiers ``E'' and ``O'' are ignored.
-
 */
 package strftime

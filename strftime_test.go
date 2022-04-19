@@ -207,9 +207,31 @@ func TestParse(t *testing.T) {
 			t.Logf("Parse(%q) = %v", test.format, err)
 		}
 	}
+}
 
+func TestParse_Error(t *testing.T) {
 	if got, err := strftime.Parse("%C", ""); err == nil || !got.IsZero() {
 		t.Errorf("Parse(%q) = %v", "%C", got)
+	}
+}
+
+func TestParse_Table(t *testing.T) {
+	var parseTests = []struct {
+		format string
+		time   string
+	}{
+		{"%FT%T%:z", "2009-08-07T06:05:04.300Z"},
+		{"%FT%T%:z", "2009-8-7T6:5:4.3Z"},
+		{"%r %D", "06:05:04.3 AM 08/07/09"},
+		{"%r %D", "6:5:4.3 AM 8/7/09"},
+	}
+
+	for _, test := range parseTests {
+		if got, err := strftime.Parse(test.format, test.time); err != nil {
+			t.Errorf("Parse(%q) = %v", test.format, err)
+		} else if got != reference {
+			t.Errorf("Parse(%q) = %q, want %q", test.format, got, test.time)
+		}
 	}
 }
 

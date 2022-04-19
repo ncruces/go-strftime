@@ -3,7 +3,7 @@ package strftime
 import "strings"
 
 // https://strftime.org/
-func goLayout(spec, flag byte) string {
+func goLayout(spec, flag byte, parsing bool) string {
 	switch spec {
 	default:
 		return ""
@@ -13,7 +13,7 @@ func goLayout(spec, flag byte) string {
 	case 'b', 'h':
 		return "Jan"
 	case 'm':
-		if flag == '-' {
+		if flag == '-' || parsing {
 			return "1"
 		}
 		return "01"
@@ -24,32 +24,35 @@ func goLayout(spec, flag byte) string {
 	case 'e':
 		return "_2"
 	case 'd':
-		if flag == '-' {
+		if flag == '-' || parsing {
 			return "2"
 		}
 		return "02"
 	case 'j':
 		if flag == '-' {
+			if parsing {
+				return "__2"
+			}
 			return ""
 		}
 		return "002"
 	case 'I':
-		if flag == '-' {
+		if flag == '-' || parsing {
 			return "3"
 		}
 		return "03"
 	case 'H':
-		if flag == '-' {
+		if flag == '-' && !parsing {
 			return ""
 		}
 		return "15"
 	case 'M':
-		if flag == '-' {
+		if flag == '-' || parsing {
 			return "4"
 		}
 		return "04"
 	case 'S':
-		if flag == '-' {
+		if flag == '-' || parsing {
 			return "5"
 		}
 		return "05"
@@ -65,29 +68,52 @@ func goLayout(spec, flag byte) string {
 		return "MST"
 	case 'z':
 		if flag == ':' {
+			if parsing {
+				return "Z07:00"
+			}
 			return "-07:00"
+		}
+		if parsing {
+			return "Z0700"
 		}
 		return "-0700"
 
 	case '+':
+		if parsing {
+			return "Mon Jan _2 15:4:5 MST 2006"
+		}
 		return "Mon Jan _2 15:04:05 MST 2006"
 	case 'c':
+		if parsing {
+			return "Mon Jan _2 15:4:5 2006"
+		}
 		return "Mon Jan _2 15:04:05 2006"
 	case 'v':
 		return "_2-Jan-2006"
 	case 'F':
+		if parsing {
+			return "2006-1-2"
+		}
 		return "2006-01-02"
-	case 'D':
-		return "01/02/06"
-	case 'x':
+	case 'D', 'x':
+		if parsing {
+			return "1/2/06"
+		}
 		return "01/02/06"
 	case 'r':
+		if parsing {
+			return "3:4:5 PM"
+		}
 		return "03:04:05 PM"
-	case 'T':
-		return "15:04:05"
-	case 'X':
+	case 'T', 'X':
+		if parsing {
+			return "15:4:5"
+		}
 		return "15:04:05"
 	case 'R':
+		if parsing {
+			return "15:4"
+		}
 		return "15:04"
 
 	case '%':
@@ -185,15 +211,11 @@ func uts35Pattern(spec, flag byte) string {
 		return "d-MMM-yyyy"
 	case 'F':
 		return "yyyy-MM-dd"
-	case 'D':
-		return "MM/dd/yy"
-	case 'x':
+	case 'D', 'x':
 		return "MM/dd/yy"
 	case 'r':
 		return "hh:mm:ss a"
-	case 'T':
-		return "HH:mm:ss"
-	case 'X':
+	case 'T', 'X':
 		return "HH:mm:ss"
 	case 'R':
 		return "HH:mm"

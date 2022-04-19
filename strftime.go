@@ -127,7 +127,7 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 			return nil
 		}
 
-		if layout := goLayout(spec, flag); layout != "" {
+		if layout := goLayout(spec, flag, false); layout != "" {
 			dst = t.AppendFormat(dst, layout)
 			return nil
 		}
@@ -147,7 +147,7 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 // Parse converts a textual representation of time to the time value it represents
 // according to the strptime format specification.
 func Parse(fmt, value string) (time.Time, error) {
-	pattern, err := Layout(fmt)
+	pattern, err := layout(fmt, true)
 	if err != nil {
 		return time.Time{}, err
 	}
@@ -157,6 +157,10 @@ func Parse(fmt, value string) (time.Time, error) {
 // Layout converts a strftime format specification
 // to a Go time pattern specification.
 func Layout(fmt string) (string, error) {
+	return layout(fmt, false)
+}
+
+func layout(fmt string, parsing bool) (string, error) {
 	dst := buffer(fmt)
 	var parser parser
 
@@ -183,7 +187,7 @@ func Layout(fmt string) (string, error) {
 	}
 
 	parser.format = func(spec, flag byte) error {
-		if layout := goLayout(spec, flag); layout != "" {
+		if layout := goLayout(spec, flag, parsing); layout != "" {
 			dst = append(dst, layout...)
 			return nil
 		}
