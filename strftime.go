@@ -95,11 +95,11 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 			return nil
 		case 'g':
 			y, _ := t.ISOWeek()
-			dst = time.Date(y, 1, 1, 0, 0, 0, 0, time.UTC).AppendFormat(dst, "06")
+			dst = year(y).AppendFormat(dst, "06")
 			return nil
 		case 'G':
 			y, _ := t.ISOWeek()
-			dst = time.Date(y, 1, 1, 0, 0, 0, 0, time.UTC).AppendFormat(dst, "2006")
+			dst = year(y).AppendFormat(dst, "2006")
 			return nil
 		case 's':
 			dst = strconv.AppendInt(dst, t.Unix(), 10)
@@ -273,6 +273,10 @@ func buffer(format string) (buf []byte) {
 	return
 }
 
+func year(y int) time.Time {
+	return time.Date(y, time.January, 1, 0, 0, 0, 0, time.UTC)
+}
+
 func appendWeekNumber(dst []byte, t time.Time, flag byte, sunday bool) []byte {
 	offset := int(t.Weekday())
 	if sunday {
@@ -307,7 +311,8 @@ func appendInt2(dst []byte, i int, flag byte) []byte {
 	return appendInt1(dst, i)
 }
 
-const smallsString = "00010203040506070809" +
+const smallsString = "" +
+	"00010203040506070809" +
 	"10111213141516171819" +
 	"20212223242526272829" +
 	"30313233343536373839" +
