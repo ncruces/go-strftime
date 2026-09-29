@@ -136,7 +136,7 @@ func TestFormat_Hour(t *testing.T) {
 		23: {"11", "23"},
 	}
 
-	for h := 0; h < len(hours); h++ {
+	for h := range hours {
 		base := reference.Add(time.Duration(h) * time.Hour)
 		want := hours[base.Hour()]
 		if got := strftime.Format("%l", base); got != want.hour12 {
@@ -159,7 +159,7 @@ func TestFormat_Weekday(t *testing.T) {
 		time.Saturday:  {"6", "6"},
 	}
 
-	for d := 0; d < len(weekdays); d++ {
+	for d := range weekdays {
 		base := reference.AddDate(0, 0, d)
 		want := weekdays[base.Weekday()]
 		if got := strftime.Format("%w", base); got != want.sunday0 {
@@ -195,6 +195,27 @@ func TestFormat_WeekNumber(t *testing.T) {
 	}
 }
 
+func TestFormat_Century(t *testing.T) {
+	for _, tt := range []struct {
+		year int
+		want string
+	}{
+		{-101, "-2"},
+		{-100, "-1"},
+		{-99, "-1"},
+		{-1, "-1"},
+		{0, "00"},
+		{99, "00"},
+		{100, "01"},
+		{9999, "99"},
+		{10000, "100"},
+	} {
+		date := time.Date(tt.year, 1, 1, 0, 0, 0, 0, time.UTC)
+		if got := strftime.Format("%C", date); got != tt.want {
+			t.Errorf("year %d: got %q, want %q", tt.year, got, tt.want)
+		}
+	}
+}
 func TestParse(t *testing.T) {
 	for _, test := range timeTests {
 		if got, err := strftime.Parse(test.format, test.time); err != nil && test.layout != "" {

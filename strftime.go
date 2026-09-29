@@ -80,11 +80,7 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 			dst = t.AppendFormat(dst, "2006")
 			return nil
 		case 'C':
-			y := t.Year()
-			century := y / 100
-			if y%100 < 0 {
-				century--
-			}
+			century := century(t)
 			if century >= 0 && century < 10 {
 				dst = append(dst, '0')
 			}
@@ -304,6 +300,15 @@ func buffer(format string) (buf []byte) {
 
 func year(y int) time.Time {
 	return time.Date(y, time.January, 1, 0, 0, 0, 0, time.UTC)
+}
+
+func century(t time.Time) int {
+	y := t.Year()
+	c := y / 100
+	if y%100 < 0 {
+		c--
+	}
+	return c
 }
 
 func appendWeekNumber(dst []byte, t time.Time, flag byte, sunday bool) []byte {
