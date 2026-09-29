@@ -80,8 +80,15 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 			dst = t.AppendFormat(dst, "2006")
 			return nil
 		case 'C':
-			dst = t.AppendFormat(dst, "2006")
-			dst = dst[:len(dst)-2]
+			y := t.Year()
+			century := y / 100
+			if y%100 < 0 {
+				century--
+			}
+			if century >= 0 && century < 10 {
+				dst = append(dst, '0')
+			}
+			dst = strconv.AppendInt(dst, int64(century), 10)
 			return nil
 		case 'U':
 			dst = appendWeekNumber(dst, t, flag, true)
