@@ -73,8 +73,12 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 		case 'N':
 			dst = append(dst, t.Format(".000000000")[1:]...)
 			return nil
+		case 'D', 'x':
+			dst = t.AppendFormat(dst, "01/02/")
+			dst = appendYear2(dst, t.Year())
+			return nil
 		case 'y':
-			dst = t.AppendFormat(dst, "06")
+			dst = appendYear2(dst, t.Year())
 			return nil
 		case 'Y':
 			dst = t.AppendFormat(dst, "2006")
@@ -98,7 +102,7 @@ func AppendFormat(dst []byte, fmt string, t time.Time) []byte {
 			return nil
 		case 'g':
 			y, _ := t.ISOWeek()
-			dst = year(y).AppendFormat(dst, "06")
+			dst = appendYear2(dst, y)
 			return nil
 		case 'G':
 			y, _ := t.ISOWeek()
@@ -319,6 +323,14 @@ func appendWeekNumber(dst []byte, t time.Time, flag byte, sunday bool) []byte {
 		offset = 7 - offset
 	}
 	return appendInt2(dst, (t.YearDay()+offset)/7, flag)
+}
+
+func appendYear2(dst []byte, y int) []byte {
+	y %= 100
+	if y < 0 {
+		y += 100
+	}
+	return appendInt2(dst, y, 0)
 }
 
 func append12Hour(dst []byte, t time.Time, flag byte) []byte {
