@@ -290,3 +290,39 @@ func TestUTS35(t *testing.T) {
 		}
 	}
 }
+
+func TestFormat_NegativeYearRemainders(t *testing.T) {
+	for _, test := range []struct {
+		year int
+		want string
+	}{
+		{-201, "99"}, {-200, "00"}, {-199, "01"},
+		{-101, "99"}, {-100, "00"}, {-99, "01"},
+		{-1, "99"}, {0, "00"}, {1, "01"},
+		{99, "99"}, {100, "00"}, {101, "01"},
+	} {
+		base := time.Date(test.year, time.January, 4, 0, 0, 0, 0, time.UTC)
+		for _, format := range []string{"%y", "%Ey", "%Oy", "%g"} {
+			if got := strftime.Format(format, base); got != test.want {
+				t.Errorf("Format(%q, year %d) = %q, want %q", format, test.year, got, test.want)
+			}
+		}
+		for _, format := range []string{"%D", "%x"} {
+			if got, want := strftime.Format(format, base), "01/04/"+test.want; got != want {
+				t.Errorf("Format(%q, year %d) = %q, want %q", format, test.year, got, want)
+			}
+		}
+	}
+
+	for _, test := range []struct {
+		date time.Time
+		want string
+	}{
+		{time.Date(0, time.January, 1, 0, 0, 0, 0, time.UTC), "99"},
+		{time.Date(-1, time.January, 1, 0, 0, 0, 0, time.UTC), "98"},
+	} {
+		if got := strftime.Format("%g", test.date); got != test.want {
+			t.Errorf("Format(%%g, %s) = %q, want %q", test.date, got, test.want)
+		}
+	}
+}
