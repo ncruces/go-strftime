@@ -29,7 +29,7 @@ func goLayout(spec, flag byte, parsing bool) string {
 		}
 		return "02"
 	case 'j':
-		if flag == '-' {
+		if flag == '-' || parsing {
 			if parsing {
 				return "__2"
 			}

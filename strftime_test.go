@@ -236,6 +236,45 @@ func TestParse_Error(t *testing.T) {
 	}
 }
 
+func TestParse_DayOfYear(t *testing.T) {
+	for _, test := range []struct {
+		value string
+		date  string
+	}{
+		{"2024-1", "2024-01-01"},
+		{"2024-01", "2024-01-01"},
+		{"2024-001", "2024-01-01"},
+		{"2024-60", "2024-02-29"},
+		{"2024-060", "2024-02-29"},
+		{"2023-60", "2023-03-01"},
+		{"2024-366", "2024-12-31"},
+		{"2023-365", "2023-12-31"},
+	} {
+		got, err := strftime.Parse("%Y-%j", test.value)
+		if err != nil {
+			t.Errorf("Parse(%%Y-%%j, %q) = %v", test.value, err)
+		} else if date := got.Format("2006-01-02"); date != test.date {
+			t.Errorf("Parse(%%Y-%%j, %q) = %q, want %q", test.value, date, test.date)
+		}
+	}
+
+	for _, value := range []string{"2024-0", "2024-000", "2024-367", "2023-366", "2024-1234"} {
+		if got, err := strftime.Parse("%Y-%j", value); err == nil || !got.IsZero() {
+			t.Errorf("Parse(%%Y-%%j, %q) = %v, %v; want zero time and an error", value, got, err)
+		}
+	}
+}
+
+func TestDayOfYear_Padding(t *testing.T) {
+	date := time.Date(2024, time.January, 1, 0, 0, 0, 0, time.UTC)
+	if got := strftime.Format("%j/%-j", date); got != "001/1" {
+		t.Errorf("Format(%%j/%%-j) = %q, want %q", got, "001/1")
+	}
+	if got, err := strftime.Layout("%j"); err != nil || got != "002" {
+		t.Errorf("Layout(%%j) = %q, %v; want %q", got, err, "002")
+	}
+}
+
 func TestParse_Table(t *testing.T) {
 	var parseTests = []struct {
 		format string
